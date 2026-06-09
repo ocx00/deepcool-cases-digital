@@ -1,0 +1,211 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<Wix xmlns="http://wixtoolset.org/schemas/v4/wxs">
+  <Package Name="DeepCool Cases Digital"
+           Manufacturer="DeepCool Cases Digital"
+           Version="0.1.1"
+           UpgradeCode="7F39AB26-02D4-4F0B-9B1D-2BB0172D9B4C"
+           Language="2052"
+           Codepage="936"
+           Scope="perMachine">
+
+    <MajorUpgrade DowngradeErrorMessage="已经安装了更新版本的 DeepCool Cases Digital。" />
+    <MediaTemplate EmbedCab="yes" />
+
+    <Property Id="CASEMODEL">
+      <RegistrySearch Id="SearchCaseModel" Root="HKLM" Key="Software\DeepCool Cases Digital" Name="CaseModel" Type="raw" />
+    </Property>
+    <Property Id="SHOWCPU" Value="1">
+      <RegistrySearch Id="SearchShowCpu" Root="HKLM" Key="Software\DeepCool Cases Digital" Name="ShowCpu" Type="raw" />
+    </Property>
+    <Property Id="SHOWGPU" Value="1">
+      <RegistrySearch Id="SearchShowGpu" Root="HKLM" Key="Software\DeepCool Cases Digital" Name="ShowGpu" Type="raw" />
+    </Property>
+    <Property Id="REFRESHSECONDS" Value="2 秒">
+      <RegistrySearch Id="SearchRefreshSeconds" Root="HKLM" Key="Software\DeepCool Cases Digital" Name="RefreshSeconds" Type="raw" />
+    </Property>
+    <Property Id="SWITCHAFTERREFRESHES" Value="3 次刷新">
+      <RegistrySearch Id="SearchSwitchAfterRefreshes" Root="HKLM" Key="Software\DeepCool Cases Digital" Name="SwitchAfterRefreshes" Type="raw" />
+    </Property>
+    <WixVariable Id="WixUICostingPopupOptOut" Value="0" />
+
+    <Feature Id="MainFeature" Title="DeepCool Cases Digital" Level="1">
+      <ComponentGroupRef Id="AppFiles" />
+    </Feature>
+
+    <UIRef Id="DeepCoolNativeUI" />
+  </Package>
+
+  <Fragment>
+    <StandardDirectory Id="ProgramFilesFolder">
+      <Directory Id="INSTALLFOLDER" Name="DeepCool Cases Digital" />
+    </StandardDirectory>
+  </Fragment>
+
+  <Fragment>
+    <ComponentGroup Id="AppFiles" Directory="INSTALLFOLDER">
+      <Component Id="MainExecutable" Guid="0C60116E-A793-4BDB-8887-3BD86ED7174E">
+        <File Id="DeepCoolExe" Source="$(var.SourceDir)\DeepCool.Cases.Digital.exe" KeyPath="yes" />
+        <ServiceInstall Id="DeepCoolService"
+                        Type="ownProcess"
+                        Name="DeepCool Cases Digital"
+                        DisplayName="DeepCool Cases Digital"
+                        Description="DeepCool DIGITAL 机箱数显后台服务"
+                        Start="auto"
+                        ErrorControl="normal" />
+        <ServiceControl Id="DeepCoolServiceControl"
+                        Name="DeepCool Cases Digital"
+                        Start="install"
+                        Stop="both"
+                        Remove="uninstall"
+                        Wait="yes" />
+      </Component>
+
+      <Component Id="AppRuntimeFiles" Guid="11AA097B-A436-4E7D-8B90-F81C8C2F4D01">
+        <File Source="$(var.SourceDir)\DeepCool.Cases.Digital.dll" />
+        <File Source="$(var.SourceDir)\DeepCool.Cases.Digital.deps.json" />
+        <File Source="$(var.SourceDir)\DeepCool.Cases.Digital.runtimeconfig.json" />
+        <File Source="$(var.SourceDir)\DeepCool.Cases.Digital.Core.dll" />
+        <File Source="$(var.SourceDir)\HidSharp.dll" />
+        <File Source="$(var.SourceDir)\LibreHardwareMonitorLib.dll" />
+        <File Source="$(var.SourceDir)\Mono.Posix.NETStandard.dll" />
+        <File Source="$(var.SourceDir)\MonoPosixHelper.dll" />
+        <File Source="$(var.SourceDir)\libMonoPosixHelper.dll" />
+        <File Source="$(var.SourceDir)\System.CodeDom.dll" />
+        <File Source="$(var.SourceDir)\System.Diagnostics.EventLog.dll" />
+        <File Source="$(var.SourceDir)\System.Diagnostics.EventLog.Messages.dll" />
+        <File Source="$(var.SourceDir)\System.IO.Ports.dll" />
+        <File Source="$(var.SourceDir)\System.Management.dll" />
+        <File Source="$(var.SourceDir)\System.ServiceProcess.ServiceController.dll" />
+      </Component>
+
+      <Component Id="AppConfiguration" Guid="32D089BD-4D7B-4F04-B060-4F92C6052971">
+        <RegistryKey Root="HKLM" Key="Software\DeepCool Cases Digital">
+          <RegistryValue Name="CaseModel" Type="string" Value="[CASEMODEL]" KeyPath="yes" />
+          <RegistryValue Name="ShowCpu" Type="integer" Value="[SHOWCPU]" />
+          <RegistryValue Name="ShowGpu" Type="integer" Value="[SHOWGPU]" />
+          <RegistryValue Name="RefreshSeconds" Type="string" Value="[REFRESHSECONDS]" />
+          <RegistryValue Name="SwitchAfterRefreshes" Type="string" Value="[SWITCHAFTERREFRESHES]" />
+        </RegistryKey>
+      </Component>
+    </ComponentGroup>
+  </Fragment>
+
+  <Fragment>
+    <UI Id="DeepCoolNativeUI">
+      <TextStyle Id="DeepCool_Font_Normal" FaceName="Microsoft YaHei UI" Size="10" />
+      <TextStyle Id="DeepCool_Font_Large" FaceName="Microsoft YaHei UI" Size="13" />
+      <TextStyle Id="DeepCool_Font_Title" FaceName="Microsoft YaHei UI" Size="18" Bold="yes" />
+      <Property Id="DefaultUIFont" Value="DeepCool_Font_Normal" />
+
+      <DialogRef Id="ErrorDlg" />
+      <DialogRef Id="FatalError" />
+      <DialogRef Id="FilesInUse" />
+      <DialogRef Id="MsiRMFilesInUse" />
+      <DialogRef Id="PrepareDlg" />
+      <DialogRef Id="ProgressDlg" />
+      <DialogRef Id="ResumeDlg" />
+      <DialogRef Id="UserExit" />
+      <DialogRef Id="ExitDialog" />
+
+      <Dialog Id="DeepCoolCaseRequiredDlg" Width="300" Height="110" Title="[ProductName]">
+        <Control Id="Text" Type="Text" X="24" Y="20" Width="252" Height="34" Transparent="yes" Text="请先选择机箱型号。" />
+        <Control Id="Ok" Type="PushButton" X="120" Y="70" Width="60" Height="22" Default="yes" Cancel="yes" Text="确定">
+          <Publish Event="EndDialog" Value="Return" />
+        </Control>
+      </Dialog>
+
+      <Dialog Id="DeepCoolCaseDlg" Width="500" Height="340" Title="[ProductName] - 选择机箱">
+        <Control Id="Title" Type="Text" X="36" Y="24" Width="430" Height="32" Transparent="yes" NoPrefix="yes" Text="{\DeepCool_Font_Title}选择机箱型号" />
+        <Control Id="Description" Type="Text" X="40" Y="64" Width="430" Height="24" Transparent="yes" Text="{\DeepCool_Font_Large}请选择你的 DeepCool DIGITAL 机箱。" />
+        <Control Id="CaseGroup" Type="RadioButtonGroup" X="40" Y="102" Width="430" Height="112" Property="CASEMODEL">
+          <RadioButtonGroup Property="CASEMODEL">
+            <RadioButton Value="Ch170" X="0" Y="0" Width="135" Height="24" Text="CH170 DIGITAL" />
+            <RadioButton Value="Ch270" X="145" Y="0" Width="135" Height="24" Text="CH270 DIGITAL" />
+            <RadioButton Value="Ch690" X="290" Y="0" Width="135" Height="24" Text="CH690 DIGITAL" />
+            <RadioButton Value="Ch360" X="0" Y="42" Width="135" Height="24" Text="CH360 DIGITAL" />
+            <RadioButton Value="Ch560" X="145" Y="42" Width="135" Height="24" Text="CH560 DIGITAL" />
+            <RadioButton Value="Morpheus" X="290" Y="42" Width="135" Height="24" Text="MORPHEUS" />
+            <RadioButton Value="Ch510Mesh" X="0" Y="84" Width="180" Height="24" Text="CH510 MESH DIGITAL" />
+          </RadioButtonGroup>
+        </Control>
+        <Control Id="BottomLine" Type="Line" X="0" Y="286" Width="500" Height="0" />
+        <Control Id="Back" Type="PushButton" X="235" Y="304" Width="70" Height="22" Text="上一步(&amp;B)" Disabled="yes" />
+        <Control Id="Next" Type="PushButton" X="321" Y="304" Width="70" Height="22" Default="yes" Text="下一步(&amp;N)">
+          <Publish Event="SpawnDialog" Value="DeepCoolCaseRequiredDlg" Condition="NOT CASEMODEL" />
+          <Publish Event="NewDialog" Value="DeepCoolOptionsDlg" Condition="CASEMODEL" />
+        </Control>
+        <Control Id="Cancel" Type="PushButton" X="407" Y="304" Width="70" Height="22" Cancel="yes" Text="取消">
+          <Publish Event="EndDialog" Value="Exit" />
+        </Control>
+      </Dialog>
+
+      <Dialog Id="DeepCoolMaintenanceDlg" Width="500" Height="340" Title="[ProductName] - 维护">
+        <Control Id="Title" Type="Text" X="36" Y="34" Width="430" Height="36" Transparent="yes" NoPrefix="yes" Text="{\DeepCool_Font_Title}选择操作" />
+        <Control Id="Description" Type="Text" X="40" Y="80" Width="420" Height="30" Transparent="yes" Text="{\DeepCool_Font_Large}请选择要执行的操作。" />
+        <Control Id="Configure" Type="PushButton" X="95" Y="150" Width="120" Height="30" Default="yes" Text="配置(&amp;C)">
+          <Publish Property="WixUI_InstallMode" Value="Repair" />
+          <Publish Property="REINSTALL" Value="ALL" />
+          <Publish Property="REINSTALLMODE" Value="vomus" />
+          <Publish Event="NewDialog" Value="DeepCoolCaseDlg" />
+        </Control>
+        <Control Id="Remove" Type="PushButton" X="285" Y="150" Width="120" Height="30" Text="卸载(&amp;U)">
+          <Publish Property="WixUI_InstallMode" Value="Remove" />
+          <Publish Property="REMOVE" Value="ALL" />
+          <Publish Event="EndDialog" Value="Return" />
+        </Control>
+        <Control Id="ConfigText" Type="Text" X="75" Y="190" Width="160" Height="36" Transparent="yes" Text="修改机箱型号、显示内容和刷新节奏。" />
+        <Control Id="RemoveText" Type="Text" X="265" Y="190" Width="160" Height="36" Transparent="yes" Text="从计算机中删除 DeepCool Cases Digital。" />
+        <Control Id="BottomLine" Type="Line" X="0" Y="286" Width="500" Height="0" />
+        <Control Id="Back" Type="PushButton" X="235" Y="304" Width="70" Height="22" Text="上一步(&amp;B)" Disabled="yes" />
+        <Control Id="Next" Type="PushButton" X="321" Y="304" Width="70" Height="22" Text="下一步(&amp;N)" Disabled="yes" />
+        <Control Id="Cancel" Type="PushButton" X="407" Y="304" Width="70" Height="22" Cancel="yes" Text="取消">
+          <Publish Event="EndDialog" Value="Exit" />
+        </Control>
+      </Dialog>
+
+      <Dialog Id="DeepCoolOptionsDlg" Width="500" Height="340" Title="[ProductName] - 设置显示">
+        <Control Id="Title" Type="Text" X="36" Y="24" Width="430" Height="32" Transparent="yes" NoPrefix="yes" Text="{\DeepCool_Font_Title}设置显示内容和刷新节奏" />
+        <Control Id="PagesLabel" Type="Text" X="40" Y="76" Width="120" Height="20" Transparent="yes" Text="{\DeepCool_Font_Large}显示内容" />
+        <Control Id="CpuCheck" Type="CheckBox" X="170" Y="76" Width="80" Height="22" Property="SHOWCPU" CheckBoxValue="1" Text="CPU" />
+        <Control Id="GpuCheck" Type="CheckBox" X="260" Y="76" Width="80" Height="22" Property="SHOWGPU" CheckBoxValue="1" Text="GPU" />
+        <Control Id="RefreshLabel" Type="Text" X="40" Y="126" Width="120" Height="20" Transparent="yes" Text="{\DeepCool_Font_Large}刷新时间" />
+        <Control Id="RefreshCombo" Type="ComboBox" X="170" Y="123" Width="120" Height="80" Property="REFRESHSECONDS">
+          <ComboBox Property="REFRESHSECONDS">
+            <ListItem Text="2 秒" Value="2 秒" />
+            <ListItem Text="3 秒" Value="3 秒" />
+            <ListItem Text="5 秒" Value="5 秒" />
+            <ListItem Text="10 秒" Value="10 秒" />
+          </ComboBox>
+        </Control>
+        <Control Id="SwitchLabel" Type="Text" X="40" Y="176" Width="120" Height="20" Transparent="yes" Text="{\DeepCool_Font_Large}切换间隔" />
+        <Control Id="SwitchCombo" Type="ComboBox" X="170" Y="173" Width="120" Height="90" Property="SWITCHAFTERREFRESHES">
+          <ComboBox Property="SWITCHAFTERREFRESHES">
+            <ListItem Text="1 次刷新" Value="1 次刷新" />
+            <ListItem Text="2 次刷新" Value="2 次刷新" />
+            <ListItem Text="3 次刷新" Value="3 次刷新" />
+            <ListItem Text="5 次刷新" Value="5 次刷新" />
+            <ListItem Text="10 次刷新" Value="10 次刷新" />
+          </ComboBox>
+        </Control>
+        <Control Id="SwitchHelp" Type="Text" X="300" Y="174" Width="180" Height="42" Transparent="yes" Text="达到刷新次数轮播 CPU/GPU。" />
+        <Control Id="BottomLine" Type="Line" X="0" Y="286" Width="500" Height="0" />
+        <Control Id="Back" Type="PushButton" X="235" Y="304" Width="70" Height="22" Text="上一步(&amp;B)">
+          <Publish Event="NewDialog" Value="DeepCoolCaseDlg" />
+        </Control>
+        <Control Id="Install" Type="PushButton" X="321" Y="304" Width="70" Height="22" Default="yes" Text="安装(&amp;I)">
+          <Publish Event="EndDialog" Value="Return" />
+        </Control>
+        <Control Id="Cancel" Type="PushButton" X="407" Y="304" Width="70" Height="22" Cancel="yes" Text="取消">
+          <Publish Event="EndDialog" Value="Exit" />
+        </Control>
+      </Dialog>
+
+      <Publish Dialog="ExitDialog" Control="Finish" Event="EndDialog" Value="Return" />
+
+      <InstallUISequence>
+        <Show Dialog="DeepCoolCaseDlg" Before="ProgressDlg" Condition="NOT Installed OR PATCH" />
+        <Show Dialog="DeepCoolMaintenanceDlg" Before="ProgressDlg" Condition="Installed AND NOT RESUME AND NOT Preselected AND NOT PATCH" />
+      </InstallUISequence>
+    </UI>
+  </Fragment>
+</Wix>
